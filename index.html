@@ -10,6 +10,46 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <!-- Prism.js untuk syntax highlighting -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <meta name="theme-color" content="#1a3c87">
+    <script id="manifest-json" type="application/json">
+    {
+        "name": "KILLER VPN Converter",
+        "short_name": "Converter",
+        "start_url": ".",
+        "display": "standalone",
+        "background_color": "#f5f6fa",
+        "theme_color": "#1a3c87",
+        "description": "Link to YAML & Sing-box Converter - KILLER VPN",
+        "icons": [
+            {
+                "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAGUExURQAAAP///6XZn90AAAAJcEhZcwAADsMAAA7DAcdvqGQAAACVSURBVHja7cExAQAAAMKg9U/tC8gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPgZA3QAAFGSitIAAAAASUVORK5CYII=",
+                "sizes": "192x192",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAGUExURQAAAP///6XZn90AAAAJcEhZcwAADsMAAA7DAcdvqGQAAAC9SURBVHja7cExAQAAAMKg9U/tCF8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4GgBDAAEy4gZ3AAAAAElFTkSuQmCC",
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }
+        ]
+    }
+    </script>
+    <script>
+        // Inject manifest
+        try {
+            const manifestJson = document.getElementById('manifest-json').innerHTML;
+            const blob = new Blob([manifestJson], { type: 'application/json' });
+            const manifestUrl = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+        } catch (e) {
+            console.error("Failed to inject manifest:", e);
+        }
+    </script>
     <style>
         :root {
             /* Tema Terang */
@@ -1192,6 +1232,72 @@
             toastEl.classList.add(`bg-${type}`);
             const toast = new bootstrap.Toast(toastEl);
             toast.show();
+        }
+
+        // --- Service Worker ---
+        const serviceWorkerScript = `
+            const CACHE_NAME = 'killer-vpn-converter-cache-v1';
+            const urlsToCache = [
+                '/',
+                '/index.html'
+            ];
+
+            self.addEventListener('install', event => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            console.log('Opened cache');
+                            // We cache the root ('/') and the file ('/index.html') to ensure it works offline
+                            // even if the user navigates directly to index.html
+                            return cache.addAll(urlsToCache.map(url => new Request(self.location.origin + url)));
+                        })
+                );
+            });
+
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    caches.match(event.request)
+                        .then(response => {
+                            if (response) {
+                                return response;
+                            }
+                            return fetch(event.request);
+                        })
+                );
+            });
+
+            self.addEventListener('activate', event => {
+                const cacheWhitelist = [CACHE_NAME];
+                event.waitUntil(
+                    caches.keys().then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.map(cacheName => {
+                                if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                    return caches.delete(cacheName);
+                                }
+                            })
+                        );
+                    })
+                );
+            });
+        `;
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                try {
+                    const blob = new Blob([serviceWorkerScript.trim()], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(swUrl)
+                        .then(registration => {
+                            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                        })
+                        .catch(error => {
+                            console.log('ServiceWorker registration failed: ', error);
+                        });
+                } catch (e) {
+                    console.error("Failed to register ServiceWorker:", e);
+                }
+            });
         }
     </script>
 </body>
