@@ -450,6 +450,10 @@
                         </select>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label for="wildcard" class="form-label">Wildcard Domain (opsional):</label>
+                    <input type="text" class="form-control" id="wildcard" placeholder="Contoh: cf.gazz.biz.id">
+                </div>
                 <button type="submit" class="btn btn-primary w-100"><i class="fas fa-sync-alt me-1"></i>Convert</button>
             </form>
             <div class="loading" id="loading"><i class="fas fa-spinner fa-spin me-1"></i>Memproses...</div>
@@ -614,6 +618,7 @@
             e.preventDefault();
             const linkInput = document.getElementById('link').value;
             const filter = document.getElementById('filter').value;
+            const wildcardDomain = document.getElementById('wildcard').value.trim();
             const resultDiv = document.getElementById('yamlResult');
             const loadingDiv = document.getElementById('loading');
             const scrollY = window.scrollY;
@@ -641,11 +646,11 @@
                         try {
                             let result = '';
                             if (link.startsWith('vmess://')) {
-                                result = parseVMess(link);
+                                result = parseVMess(link, wildcardDomain);
                             } else if (link.startsWith('vless://')) {
-                                result = parseVLESS(link);
+                                result = parseVLESS(link, wildcardDomain);
                             } else if (link.startsWith('trojan://')) {
-                                result = parseTrojan(link);
+                                result = parseTrojan(link, wildcardDomain);
                             } else {
                                 continue;
                             }
@@ -673,11 +678,13 @@
             }, 500);
         });
 
-        function parseVMess(link) {
+        function parseVMess(link, wildcardDomain) {
             try {
                 const base64 = link.replace('vmess://', '');
                 const decoded = atob(base64);
                 const config = JSON.parse(decoded);
+                const originalSni = config.sni || config.add;
+                const finalSni = wildcardDomain ? `${originalSni}.${wildcardDomain}` : originalSni;
                 return `- name: ${config.ps || 'Unnamed'}\n` +
                        `  server: ${config.add}\n` +
                        `  port: ${config.port}\n` +
@@ -687,19 +694,19 @@
                        `  cipher: auto\n` +
                        `  tls: ${config.tls === 'tls' ? 'true' : 'false'}\n` +
                        `  skip-cert-verify: true\n` +
-                       `  servername: ${config.sni || config.add}\n` +
+                       `  sni: ${finalSni}\n` +
                        `  network: ${config.net || 'ws'}\n` +
                        `  ws-opts:\n` +
                        `    path: ${config.path || '/'}\n` +
                        `    headers:\n` +
-                       `      Host: ${config.sni || config.add}\n` +
+                       `      Host: ${finalSni}\n` +
                        `  udp: true`;
             } catch (err) {
                 throw new Error(`Invalid VMess link: ${err.message}`);
             }
         }
 
-        function parseVLESS(link) {
+        function parseVLESS(link, wildcardDomain) {
             try {
                 const url = new URL(link);
                 const uuid = url.username;
@@ -711,6 +718,8 @@
                 const network = url.searchParams.get('type') || 'ws';
                 const hostHeader = url.searchParams.get('host') || host;
                 const name = decodeURIComponent(url.hash.substring(1)) || 'Unnamed';
+                const finalSni = wildcardDomain ? `${sni}.${wildcardDomain}` : sni;
+                const finalHost = wildcardDomain ? `${hostHeader}.${wildcardDomain}` : hostHeader;
                 return `- name: ${name}\n` +
                        `  server: ${host}\n` +
                        `  type: vless\n` +
@@ -718,19 +727,19 @@
                        `  uuid: ${uuid}\n` +
                        `  tls: ${tls ? 'true' : 'false'}\n` +
                        `  skip-cert-verify: true\n` +
-                       `  sni: ${sni}\n` +
+                       `  sni: ${finalSni}\n` +
                        `  network: ${network}\n` +
                        `  ws-opts:\n` +
                        `    path: ${path}\n` +
                        `    headers:\n` +
-                       `      Host: ${hostHeader}\n` +
+                       `      Host: ${finalHost}\n` +
                        `  udp: true`;
             } catch (err) {
                 throw new Error(`Invalid VLESS link: ${err.message}`);
             }
         }
 
-        function parseTrojan(link) {
+        function parseTrojan(link, wildcardDomain) {
             try {
                 const url = new URL(link);
                 const password = url.username;
@@ -742,6 +751,8 @@
                 const path = url.searchParams.get('path') || '/';
                 const hostHeader = url.searchParams.get('host') || host;
                 const name = decodeURIComponent(url.hash.substring(1)) || 'Unnamed';
+                const finalSni = wildcardDomain ? `${sni}.${wildcardDomain}` : sni;
+                const finalHost = wildcardDomain ? `${hostHeader}.${wildcardDomain}` : hostHeader;
                 return `- name: ${name}\n` +
                        `  server: ${host}\n` +
                        `  port: ${port}\n` +
@@ -749,12 +760,12 @@
                        `  password: ${password}\n` +
                        `  tls: ${tls ? 'true' : 'false'}\n` +
                        `  skip-cert-verify: true\n` +
-                       `  sni: ${sni}\n` +
+                       `  sni: ${finalSni}\n` +
                        `  network: ${network}\n` +
                        `  ws-opts:\n` +
                        `    path: ${path}\n` +
                        `    headers:\n` +
-                       `      Host: ${hostHeader}\n` +
+                       `      Host: ${finalHost}\n` +
                        `  udp: true`;
             } catch (err) {
                 throw new Error(`Invalid Trojan link: ${err.message}`);
