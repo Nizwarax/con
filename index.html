@@ -684,7 +684,7 @@
                 const decoded = atob(base64);
                 const config = JSON.parse(decoded);
                 const originalSni = config.sni || config.add;
-                const finalSni = wildcardDomain ? `${originalSni}.${wildcardDomain}` : originalSni;
+                const finalSni = wildcardDomain ? `${wildcardDomain}.${originalSni}` : originalSni;
                 return `- name: ${config.ps || 'Unnamed'}\n` +
                        `  server: ${config.add}\n` +
                        `  port: ${config.port}\n` +
@@ -718,8 +718,8 @@
                 const network = url.searchParams.get('type') || 'ws';
                 const hostHeader = url.searchParams.get('host') || host;
                 const name = decodeURIComponent(url.hash.substring(1)) || 'Unnamed';
-                const finalSni = wildcardDomain ? `${sni}.${wildcardDomain}` : sni;
-                const finalHost = wildcardDomain ? `${hostHeader}.${wildcardDomain}` : hostHeader;
+                const finalSni = wildcardDomain ? `${wildcardDomain}.${sni}` : sni;
+                const finalHost = wildcardDomain ? `${wildcardDomain}.${hostHeader}` : hostHeader;
                 return `- name: ${name}\n` +
                        `  server: ${host}\n` +
                        `  type: vless\n` +
@@ -751,8 +751,8 @@
                 const path = url.searchParams.get('path') || '/';
                 const hostHeader = url.searchParams.get('host') || host;
                 const name = decodeURIComponent(url.hash.substring(1)) || 'Unnamed';
-                const finalSni = wildcardDomain ? `${sni}.${wildcardDomain}` : sni;
-                const finalHost = wildcardDomain ? `${hostHeader}.${wildcardDomain}` : hostHeader;
+                const finalSni = wildcardDomain ? `${wildcardDomain}.${sni}` : sni;
+                const finalHost = wildcardDomain ? `${wildcardDomain}.${hostHeader}` : hostHeader;
                 return `- name: ${name}\n` +
                        `  server: ${host}\n` +
                        `  port: ${port}\n` +
