@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Link to YAML Converter & Sing-box Protocol Converter - KILLER VPN</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome untuk ikon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Prism.js untuk syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Tema Terang */
+            --bg-body: #f5f6fa;
+            --bg-container: #ffffff;
+            --text-color: #333333;
+            --primary-color: #1a3c87;
+            --primary-hover: #15306b;
+            --result-bg: #f8f9fa;
+            --result-border: #dddddd;
+            --label-color: #333333;
+            --toast-bg-success: #28a745;
+            --toast-bg-danger: #dc3545;
+            --license-bg: #1c2526;
+            --license-text: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            /* Tema Gelap */
+            --bg-body: #212529;
+            --bg-container: #343a40;
+            --text-color: #e9ecef;
+            --primary-color: #4b6cb7;
+            --primary-hover: #3b5791;
+            --result-bg: #2c3034;
+            --result-border: #495057;
+            --label-color: #ced4da;
+            --toast-bg-success: #1f7a38;
+            --toast-bg-danger: #a12834;
+            --license-bg: #2c3034;
+            --license-text: #e9ecef;
+        }
+
+        [data-accent="red"] {
+            --primary-color: #dc3545;
+            --primary-hover: #a12834;
+        }
+
+        [data-accent="green"] {
+            --primary-color: #28a745;
+            --primary-hover: #1f7a38;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .converter-container {
+            background: var(--bg-container);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 90vw;
+            margin: auto;
+            transition: background-color 0.3s;
+        }
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .theme-toggle:hover {
+            color: var(--primary-hover);
+        }
+        .accent-selector select {
+            padding: 3px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            background-color: var(--bg-container);
+            color: var(--text-color);
+            border: 1px solid var(--result-border);
+        }
+        h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 15px;
+        }
+        .form-label {
+            font-weight: 500;
+            color: var(--label-color);
+            font-size: 0.9rem;
+        }
+        textarea, select {
+            border-radius: 6px;
+            background-color: var(--bg-container);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        textarea:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 3px rgba(26, 60, 135, 0.3);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-copy, .btn-download {
+            background-color: #28a745;
+            border-radius: 6px;
+            padding: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .btn-copy:hover, .btn-download:hover {
+            background-color: #218838;
+        }
+        .result-container {
+            background-color: var(--result-bg);
+            border: 1px solid var(--result-border);
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 15px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text-color);
+            line-height: 1.4;
+        }
+        .loading {
+            display: none;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        .toast-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--label-color);
+            font-weight: 500;
+        }
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .converter-selector {
+            margin-bottom: 15px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .error {
+            color: var(--toast-bg-danger);
+            display: none;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        /* Styling untuk License Splash Screen */
+        .license-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .license-container {
+            background: var(--license-bg);
+            border-radius: 10px;
+            padding: 25px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            color: var(--license-text);
+            line-height: 1.8;
+        }
+        .license-container h2 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .license-container p, .license-container ul {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .license-container ul {
+            padding-left: 25px;
+        }
+        .license-container ul li {
+            margin-bottom: 10px;
+        }
+        .license-container a {
+            color: #4b6cb7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .license-container a:hover {
+            text-decoration: underline;
+        }
+        .btn-accept {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 25px auto 0;
+            width: 200px;
+            text-align: center;
+        }
+        .btn-accept:hover {
+            background-color: var(--primary-hover);
+        }
+        /* Styling Modal Lisensi */
+        .modal-content {
+            background: var(--license-bg);
+            color: var(--license-text);
+        }
+        .modal-body {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .modal-body h6 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 15px;
+        }
+        .modal-body ul {
+            padding-left: 20px;
+        }
+        .modal-body ul li {
+            margin-bottom: 10px;
+        }
+        .modal-body a {
+            color: #4b6cb7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .modal-body a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 576px) {
+            body {
+                padding: 5px;
+            }
+            .converter-container {
+                padding: 15px;
+                max-width: 100%;
+            }
+            .controls {
+                gap: 5px;
+                margin-bottom: 10px;
+            }
+            .theme-toggle {
+                font-size: 1rem;
+            }
+            .accent-selector select, .converter-selector select {
+                font-size: 0.7rem;
+                padding: 2px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            h2 {
+                font-size: 1rem;
+            }
+            .form-label {
+                font-size: 0.8rem;
+            }
+            textarea, select, .btn-primary, .btn-copy, .btn-download {
+                font-size: 0.8rem;
+            }
+            .result-container {
+                font-size: 10px;
+                min-height: 120px;
+                max-height: 250px;
+            }
+            .btn-group-mobile {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-group-mobile .btn {
+                width: 100%;
+            }
+            .footer {
+                font-size: 0.8rem;
+            }
+            .license-container {
+                padding: 15px;
+                width: 95%;
+                max-height: 90vh;
+            }
+            .license-container h2 {
+                font-size: 1.5rem;
+            }
+            .license-container p, .license-container ul {
+                font-size: 0.9rem;
+            }
+            .license-container ul {
+                padding-left: 15px;
+            }
+            .btn-accept {
+                font-size: 0.9rem;
+                padding: 8px 20px;
+                width: 150px;
+            }
+            .modal-body {
+                font-size: 0.9rem;
+            }
+            .modal-body h6 {
+                font-size: 1rem;
+            }
+        }
+        [data-theme="dark"] .token.property {
+            color: #4b6cb7;
+        }
+        [data-theme="dark"] .token.string {
+            color: #20c997;
+        }
+        [data-theme="dark"] .token.number, [data-theme="dark"] .token.boolean {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <!--
+        Lisensi dan Hak Cipta KILLER VPN
+        Hak Cipta © 2025 KILLER VPN. Seluruh Hak Dilindungi.
+        Perangkat lunak ini, termasuk Link to YAML Converter dan Sing-box Protocol Converter, adalah milik KILLER VPN.
+        Pengguna diberikan lisensi terbatas untuk penggunaan pribadi atau komersial terbatas.
+        Dilarang menyalin, memodifikasi, mendistribusikan ulang, atau merekayasa balik tanpa izin tertulis.
+        Untuk informasi lebih lanjut, kunjungi: www.nizwara.biz.id
+    -->
+    <!-- License Splash Screen -->
+    <div class="license-splash" id="licenseSplash">
+        <div class="license-container">
+            <h2>Lisensi dan Hak Cipta KILLER VPN</h2>
+            <p><strong>Hak Cipta © 2025 KILLER VPN. Seluruh Hak Dilindungi.</strong></p>
+            <p>KILLER VPN, termasuk perangkat lunak, dokumentasi, dan alat seperti <em>Link to YAML Converter</em> dan <em>Sing-box Protocol Converter</em>, dilindungi oleh undang-undang hak cipta internasional. KILLER VPN adalah merek dagang terdaftar dari KILLER VPN Inc.</p>
+            <h6>Lisensi Penggunaan</h6>
+            <ul>
+                <li>Pengguna diizinkan menggunakan KILLER VPN untuk keperluan pribadi atau komersial terbatas sesuai dokumentasi resmi.</li>
+                <li>Dilarang menyalin, memodifikasi, mendistribusikan ulang, atau merekayasa balik perangkat lunak tanpa izin tertulis.</li>
+                <li>Semua hak kepemilikan tetap dimiliki oleh KILLER VPN Inc.</li>
+            </ul>
+            <h6>Penafian</h6>
+            <p>KILLER VPN disediakan "SEBAGAIMANA ADANYA" tanpa jaminan tersurat maupun tersirat. KILLER VPN Inc. tidak bertanggung jawab atas kerusakan yang timbul dari penggunaan perangkat lunak ini.</p>
+            <p>Untuk informasi lebih lanjut, hubungi: <a href="mailto:nizwara94@gmail.com">support@killervpn.com</a> atau kunjungi <a href="https://www.nizwara.biz.id">www.nizwara.biz.id</a>.</p>
+            <button class="btn-accept" onclick="acceptLicense()">Saya Setuju</button>
+        </div>
+    </div>
+
+    <div class="converter-container">
+        <div class="controls">
+            <div class="accent-selector">
+                <select id="accentColor" title="Pilih Warna Aksen">
+                    <option value="blue">Biru</option>
+                    <option value="red">Merah</option>
+                    <option value="green">Hijau</option>
+                </select>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Tema">
+                <i class="fas fa-sun"></i>
+            </button>
+        </div>
+        <h1><i class="fas fa-cloud-upload-alt me-1"></i> Link to YAML & Sing-box Converter - KILLER VPN</h1>
+
+        <!-- Tab Content for YAML Converter -->
+        <div class="tab-content active" id="yamlTab">
+            <form id="converterForm">
+                <div class="mb-3">
+                    <label for="link" class="form-label">Masukkan Link VMess, VLESS, atau Trojan (Satu per baris):</label>
+                    <textarea class="form-control" name="link" id="link" rows="4" placeholder="Masukkan link di sini, satu per baris"></textarea>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="converterType" class="form-label">Pilih Jenis Converter:</label>
+                        <select class="form-select" id="converterType" onchange="showConverter(this.value)">
+                            <option value="yaml">Link to YAML Converter</option>
+                            <option value="singbox">Sing-box Protocol Converter</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filter" class="form-label">Pilih Filter:</label>
+                        <select class="form-select" name="filter" id="filter">
+                            <option value="all">Semua</option>
+                            <option value="only-ws">Only WS</option>
+                            <option value="grpc-only">GRPC Only</option>
+                            <option value="ws-tls">WS-TLS (Port 443)</option>
+                            <option value="ws-ntls">WS-NTLS (Port 80)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-sync-alt me-1"></i>Convert</button>
+            </form>
+            <div class="loading" id="loading"><i class="fas fa-spinner fa-spin me-1"></i>Memproses...</div>
+            <h2>Hasil YAML:</h2>
+            <pre class="result-container language-yaml"><code id="yamlResult">Masukkan tautan dan klik Convert untuk melihat hasil.</code></pre>
+            <div class="d-flex btn-group-mobile gap-2 mt-3">
+                <button class="btn btn-copy" onclick="copyToClipboard()"><i class="fas fa-copy me-1"></i>Copy to Clipboard</button>
+                <button class="btn btn-download" onclick="downloadYAML()"><i class="fas fa-download me-1"></i>Download YAML</button>
+            </div>
+        </div>
+
+        <!-- Tab Content for Sing-box Protocol Converter -->
+        <div class="tab-content" id="singboxTab">
+            <form id="singboxForm">
+                <div class="mb-3">
+                    <label for="protocolLinks" class="form-label">Masukkan Link Protokol (Satu per baris):</label>
+                    <textarea class="form-control" id="protocolLinks" rows="4" placeholder="trojan://password@server:port?security=tls&type=ws&path=/path&sni=server_name#tag"></textarea>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="converterType" class="form-label">Pilih Jenis Converter:</label>
+                        <select class="form-select" id="converterTypeSingbox" onchange="showConverter(this.value)">
+                            <option value="yaml">Link to YAML Converter</option>
+                            <option value="singbox">Sing-box Protocol Converter</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Placeholder untuk menjaga layout, karena tidak ada filter di Sing-box -->
+                        <label class="form-label" style="visibility: hidden;">Placeholder</label>
+                        <div style="height: 38px;"></div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary w-100" onclick="convertProtocol()"><i class="fas fa-sync-alt me-1"></i>Convert</button>
+            </form>
+            <p class="error" id="errorMsg">Error: Link protokol tidak valid.</p>
+            <h2>Hasil JSON:</h2>
+            <pre class="result-container language-json"><code id="output">Masukkan tautan dan klik Convert untuk melihat hasil.</code></pre>
+            <div class="d-flex btn-group-mobile gap-2 mt-3">
+                <button class="btn btn-copy" onclick="copyJson()"><i class="fas fa-copy me-1"></i>Copy to Clipboard</button>
+                <button class="btn btn-download" onclick="downloadJson()"><i class="fas fa-download me-1"></i>Download JSON</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2025 KILLER VPN. All Rights Reserved. 
+            <a href="#" data-bs-toggle="modal" data-bs-target="#licenseModal">View License</a> | 
+            <a href="https://www.nizwara.biz.id">www.nizwara.biz.id</a>
+        </div>
+    </div>
+
+    <!-- Modal untuk Lisensi -->
+    <div class="modal fade" id="licenseModal" tabindex="-1" aria-labelledby="licenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="licenseModalLabel">Lisensi dan Hak Cipta KILLER VPN</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Hak Cipta © 2025 KILLER VPN. Seluruh Hak Dilindungi.</strong></p>
+                    <p>KILLER VPN, termasuk perangkat lunak, dokumentasi, dan alat seperti <em>Link to YAML Converter</em> dan <em>Sing-box Protocol Converter</em>, dilindungi oleh undang-undang hak cipta internasional. KILLER VPN adalah merek dagang terdaftar dari KILLER VPN Inc.</p>
+                    <h6>Lisensi Penggunaan</h6>
+                    <ul>
+                        <li>Pengguna diizinkan menggunakan KILLER VPN untuk keperluan pribadi atau komersial terbatas sesuai dokumentasi resmi.</li>
+                        <li>Dilarang menyalin, memodifikasi, mendistribusikan ulang, atau merekayasa balik perangkat lunak tanpa izin tertulis.</li>
+                        <li>Semua hak kepemilikan tetap dimiliki oleh KILLER VPN Inc.</li>
+                    </ul>
+                    <h6>Penafian</h6>
+                    <p>KILLER VPN disediakan "SEBAGAIMANA ADANYA" tanpa jaminan tersurat maupun tersirat. KILLER VPN Inc. tidak bertanggung jawab atas kerusakan yang timbul dari penggunaan perangkat lunak ini.</p>
+                    <p>Untuk informasi lebih lanjut, hubungi: <a href="mailto:nizwara94@gmail.com">support@killervpn.com</a> atau kunjungi <a href="https://www.nizwara.biz.id">www.nizwara.biz.id</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container untuk Notifikasi -->
+    <div class="toast-container">
+        <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle"></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS dan Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Prism.js untuk syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script>
+        // Fungsi untuk menerima lisensi dan menyembunyikan splash screen
+        function acceptLicense() {
+            const licenseSplash = document.getElementById('licenseSplash');
+            licenseSplash.style.display = 'none';
+            localStorage.setItem('licenseAccepted', 'true');
+        }
+
+        // Cek apakah lisensi sudah diterima
+        window.onload = function() {
+            if (localStorage.getItem('licenseAccepted') === 'true') {
+                document.getElementById('licenseSplash').style.display = 'none';
+            }
+            // Set nilai awal dropdown untuk Sing-box
+            document.getElementById('converterTypeSingbox').value = 'singbox';
+        };
+
+        // Tema Gelap/Terang
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+        }
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            themeIcon.classList.toggle('fa-sun', newTheme === 'light');
+            themeIcon.classList.toggle('fa-moon', newTheme === 'dark');
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Warna Aksen Kustom
+        const accentSelect = document.getElementById('accentColor');
+        const savedAccent = localStorage.getItem('accent') || 'blue';
+        body.setAttribute('data-accent', savedAccent);
+        accentSelect.value = savedAccent;
+        accentSelect.addEventListener('change', () => {
+            const newAccent = accentSelect.value;
+            body.setAttribute('data-accent', newAccent);
+            localStorage.setItem('accent', newAccent);
+        });
+
+        // Converter Switching
+        function showConverter(type) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(type + 'Tab').classList.add('active');
+            // Update nilai dropdown di tab lain
+            document.getElementById('converterType').value = type;
+            document.getElementById('converterTypeSingbox').value = type;
+        }
+
+        // Validasi Tautan (YAML Converter)
+        function validateLink(link) {
+            const vmessRegex = /^vmess:\/\/[A-Za-z0-9+/=]+$/;
+            const vlessRegex = /^vless:\/\/[0-9a-f-]+@[\w.-]+:\d+(\?.*?)?(#.*)?$/;
+            const trojanRegex = /^trojan:\/\/[^@]+@[\w.-]+:\d+(\?.*?)?(#.*)?$/;
+            return vmessRegex.test(link) || vlessRegex.test(link) || trojanRegex.test(link);
+        }
+
+        // Form submission (YAML Converter)
+        document.getElementById('converterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const linkInput = document.getElementById('link').value;
+            const filter = document.getElementById('filter').value;
+            const resultDiv = document.getElementById('yamlResult');
+            const loadingDiv = document.getElementById('loading');
+            const scrollY = window.scrollY;
+
+            if (!linkInput.trim()) {
+                showToast('Error', 'Tidak ada tautan yang dimasukkan.', 'danger');
+                return;
+            }
+
+            const links = linkInput.split('\n').map(link => link.trim()).filter(Boolean);
+            const invalidLinks = links.filter(link => !validateLink(link));
+            if (invalidLinks.length > 0) {
+                showToast('Error', `Tautan tidak valid: ${invalidLinks.join(', ')}`, 'danger');
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            resultDiv.textContent = '';
+
+            setTimeout(() => {
+                try {
+                    const results = [];
+
+                    for (const link of links) {
+                        try {
+                            let result = '';
+                            if (link.startsWith('vmess://')) {
+                                result = parseVMess(link);
+                            } else if (link.startsWith('vless://')) {
+                                result = parseVLESS(link);
+                            } else if (link.startsWith('trojan://')) {
+                                result = parseTrojan(link);
+                            } else {
+                                continue;
+                            }
+
+                            if (shouldIncludeResult(result, filter)) {
+                                results.push(result.trim());
+                            }
+                        } catch (err) {
+                            results.push(`Error processing link "${link}": ${err.message}`);
+                        }
+                    }
+
+                    const finalResult = results.length > 0 ? results.join('\n\n') : 'Masukkan tautan dan klik Convert untuk melihat hasil.';
+                    resultDiv.textContent = finalResult;
+                    Prism.highlightElement(resultDiv);
+                    loadingDiv.style.display = 'none';
+                    showToast('Sukses', 'Konversi selesai!', 'success');
+                    window.scrollTo(0, scrollY);
+                } catch (error) {
+                    resultDiv.textContent = `Error: ${error.message}`;
+                    loadingDiv.style.display = 'none';
+                    showToast('Error', `Gagal memproses: ${error.message}`, 'danger');
+                    window.scrollTo(0, scrollY);
+                }
+            }, 500);
+        });
+
+        function parseVMess(link) {
+            try {
+                const base64 = link.replace('vmess://', '');
+                const decoded = atob(base64);
+                const config = JSON.parse(decoded);
+                return `- name: ${config.ps || 'Unnamed'}\n` +
+                       `  server: ${config.add}\n` +
+                       `  port: ${config.port}\n` +
+                       `  type: vmess\n` +
+                       `  uuid: ${config.id}\n` +
+                       `  alterId: ${config.aid || '0'}\n` +
+                       `  cipher: auto\n` +
+                       `  tls: ${config.tls === 'tls' ? 'true' : 'false'}\n` +
+                       `  skip-cert-verify: true\n` +
+                       `  servername: ${config.sni || config.add}\n` +
+                       `  network: ${config.net || 'ws'}\n` +
+                       `  ws-opts:\n` +
+                       `    path: ${config.path || '/'}\n` +
+                       `    headers:\n` +
+                       `      Host: ${config.sni || config.add}\n` +
+                       `  udp: true`;
+            } catch (err) {
+                throw new Error(`Invalid VMess link: ${err.message}`);
+            }
+        }
+
+        function parseVLESS(link) {
+            try {
+                const url = new URL(link);
+                const uuid = url.username;
+                const host = url.hostname;
+                const port = url.port || '443';
+                const path = url.searchParams.get('path') || '/';
+                const tls = url.searchParams.get('security') === 'tls';
+                const sni = url.searchParams.get('sni') || host;
+                const network = url.searchParams.get('type') || 'ws';
+                const hostHeader = url.searchParams.get('host') || host;
+                const name = decodeURIComponent(url.hash.substring(1)) || 'Unnamed';
+                return `- name: ${name}\n` +
+                       `  server: ${host}\n` +
+                       `  type: vless\n` +
+                       `  port: ${port}\n` +
+                       `  uuid: ${uuid}\n` +
+                       `  tls: ${tls ? 'true' : 'false'}\n` +
+                       `  skip-cert-verify: true\n` +
+                       `  sni: ${sni}\n` +
+                       `  network: ${network}\n` +
+                       `  ws-opts:\n` +
+                       `    path: ${path}\n` +
+                       `    headers:\n` +
+                       `      Host: ${hostHeader}\n` +
+                       `  udp: true`;
+            } catch (err) {
+                throw new Error(`Invalid VLESS link: ${err.message}`);
+            }
+        }
+
+        function parseTrojan(link) {
+            try {
+                const url = new URL(link);
+                const password = url.username;
+                const host = url.hostname;
+                const port = url.port || '443';
+                const tls = url.searchParams.get('security') === 'tls';
+                const sni = url.searchParams.get('sni') || host;
+                const network = url.searchParams.get('type') || 'ws';
+                const path = url.searchParams.get('path') || '/';
+                const hostHeader = url.searchParams.get('host') || host;
+                const name = decodeURIComponent(url.hash.substring(1)) || 'Unnamed';
+                return `- name: ${name}\n` +
+                       `  server: ${host}\n` +
+                       `  port: ${port}\n` +
+                       `  type: trojan\n` +
+                       `  password: ${password}\n` +
+                       `  tls: ${tls ? 'true' : 'false'}\n` +
+                       `  skip-cert-verify: true\n` +
+                       `  sni: ${sni}\n` +
+                       `  network: ${network}\n` +
+                       `  ws-opts:\n` +
+                       `    path: ${path}\n` +
+                       `    headers:\n` +
+                       `      Host: ${hostHeader}\n` +
+                       `  udp: true`;
+            } catch (err) {
+                throw new Error(`Invalid Trojan link: ${err.message}`);
+            }
+        }
+
+        function shouldIncludeResult(result, filter) {
+            if (filter === 'all') return true;
+            const lines = result.split('\n');
+            const networkLine = lines.find(line => line.includes('network:'));
+            const portLine = lines.find(line => line.includes('port:'));
+            if (!networkLine) return false;
+            const network = networkLine.split(':')[1].trim();
+            const port = portLine ? portLine.split(':')[1].trim() : '';
+            switch (filter) {
+                case 'only-ws':
+                    return network === 'ws';
+                case 'grpc-only':
+                    return network === 'grpc';
+                case 'ws-tls':
+                    return network === 'ws' && port === '443';
+                case 'ws-ntls':
+                    return network === 'ws' && port === '80';
+                default:
+                    return true;
+            }
+        }
+
+        function copyToClipboard() {
+            const resultDiv = document.getElementById('yamlResult');
+            if (!resultDiv.textContent || resultDiv.textContent.includes('Error')) {
+                showToast('Error', 'Tidak ada hasil untuk disalin!', 'danger');
+                return;
+            }
+            const range = document.createRange();
+            range.selectNode(resultDiv);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            showToast('Sukses', 'YAML berhasil disalin ke clipboard!', 'success');
+        }
+
+        function downloadYAML() {
+            const resultDiv = document.getElementById('yamlResult');
+            if (!resultDiv.textContent || resultDiv.textContent.includes('Error')) {
+                showToast('Error', 'Tidak ada hasil untuk diunduh!', 'danger');
+                return;
+            }
+            const blob = new Blob([resultDiv.textContent], { type: 'text/yaml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config.yaml';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Sukses', 'File YAML berhasil diunduh!', 'success');
+        }
+
+        // Template JSON dari Sing-box Protocol Converter
+        const singboxTemplate = {
+            "log": {
+                "disabled": false,
+                "level": "warn",
+                "timestamp": true
+            },
+            "experimental": {
+                "cache_file": {
+                    "enabled": true,
+                    "path": "cache.db"
+                },
+                "clash_api": {
+                    "external_controller": "127.0.0.1:9090",
+                    "external_ui": "dashboard"
+                }
+            },
+            "dns": {
+                "servers": [
+                    {
+                        "tag": "Internet-dns",
+                        "address": "1.1.1.1",
+                        "strategy": "ipv4_only",
+                        "detour": "Internet"
+                    },
+                    {
+                        "tag": "direct-dns",
+                        "address": "149.112.112.112",
+                        "strategy": "ipv4_only",
+                        "detour": "direct"
+                    },
+                    {
+                        "tag": "block-dns",
+                        "address": "rcode://success"
+                    }
+                ],
+                "rules": [
+                    {
+                        "domain_suffix": [".arpa.", ".arpa"],
+                        "server": "block-dns",
+                        "rewrite_ttl": 20
+                    },
+                    {
+                        "network": "udp",
+                        "port": 443,
+                        "server": "block-dns",
+                        "rewrite_ttl": 20
+                    },
+                    {
+                        "geosite": "rule-malicious",
+                        "server": "block-dns",
+                        "rewrite_ttl": 20
+                    },
+                    {
+                        "outbound": "Internet",
+                        "server": "Internet-dns",
+                        "rewrite_ttl": 20
+                    },
+                    {
+                        "outbound": "direct",
+                        "server": "direct-dns",
+                        "rewrite_ttl": 20
+                    },
+                    {
+                        "outbound": "any",
+                        "server": "direct-dns",
+                        "rewrite_ttl": 20
+                    }
+                ],
+                "reverse_mapping": true,
+                "strategy": "ipv4_only",
+                "independent_cache": true
+            },
+            "inbounds": [
+                {
+                    "type": "tun",
+                    "tag": "tun-in",
+                    "interface_name": "tun0",
+                    "inet4_address": "172.19.0.1/30",
+                    "inet6_address": "fdfe:dcba:9876::1/126",
+                    "mtu": 1358,
+                    "auto_route": true,
+                    "strict_route": true,
+                    "stack": "gvisor",
+                    "endpoint_independent_nat": true,
+                    "sniff": true
+                }
+            ],
+            "outbounds": [
+                {
+                    "type": "selector",
+                    "tag": "Internet",
+                    "outbounds": []
+                },
+                {
+                    "type": "selector",
+                    "tag": "SosialMedia",
+                    "outbounds": ["loadbalance", "bestping"]
+                },
+                {
+                    "type": "selector",
+                    "tag": "Game",
+                    "outbounds": ["loadbalance", "bestping"]
+                },
+                {
+                    "type": "selector",
+                    "tag": "Streaming",
+                    "outbounds": ["loadbalance", "bestping"]
+                },
+                {
+                    "type": "selector",
+                    "tag": "SpeedTest",
+                    "outbounds": ["Internet"]
+                },
+                {
+                    "type": "selector",
+                    "tag": "Blokir P0rn",
+                    "outbounds": ["block", "Internet"]
+                },
+                {
+                    "type": "http",
+                    "tag": "speedtest",
+                    "server": "speedtest.net",
+                    "server_port": 443,
+                    "tls": {
+                        "enabled": true,
+                        "insecure": false,
+                        "server_name": "speedtest.net"
+                    }
+                },
+                {
+                    "type": "direct",
+                    "tag": "direct"
+                },
+                {
+                    "type": "block",
+                    "tag": "block"
+                },
+                {
+                    "type": "dns",
+                    "tag": "dns-out"
+                }
+            ],
+            "route": {
+                "auto_detect_interface": true,
+                "override_android_vpn": true,
+                "final": "Internet",
+                "rules": [
+                    {
+                        "outbound": "dns-out",
+                        "port": [53]
+                    },
+                    {
+                        "network": "udp",
+                        "port": [443],
+                        "outbound": "block"
+                    },
+                    {
+                        "domain_suffix": ["speedtest.net", "speedtest.org"],
+                        "outbound": "SpeedTest"
+                    },
+                    {
+                        "domain_suffix": ["googlesyndication.com"],
+                        "outbound": "Internet"
+                    },
+                    {
+                        "geosite": ["rule-ads", "oisd-full"],
+                        "outbound": "block"
+                    },
+                    {
+                        "geosite": ["oisd-nsfw", "category-porn"],
+                        "outbound": "Blokir P0rn"
+                    },
+                    {
+                        "geosite": ["category-social-media"],
+                        "outbound": "SosialMedia"
+                    },
+                    {
+                        "geosite": ["category-games"],
+                        "outbound": "Game"
+                    },
+                    {
+                        "geosite": ["category-streaming"],
+                        "outbound": "Streaming"
+                    },
+                    {
+                        "protocol": "stun",
+                        "outbound": "Internet"
+                    },
+                    {
+                        "geosite": ["rule-indo"],
+                        "outbound": "Internet"
+                    },
+                    {
+                        "geoip": ["id"],
+                        "port": [21,22,23,80,81,123,143,182,183,194,443,465,587,853,993,995,998,2052,2053,2082,2083,2086,2095,2096,5222,5228,5229,5230,8000,8080,8081,8088,8443,8880,8883,8888,8889,42069],
+                        "outbound": "Internet"
+                    }
+                ]
+            }
+        };
+
+        function parseProtocolLink(link) {
+            try {
+                const url = new URL(link);
+                const protocol = url.protocol.replace(':', '');
+                const config = {};
+
+                if (protocol === 'trojan') {
+                    const tag = url.hash ? url.hash.substring(1) : null;
+                    if (!tag || tag.trim() === '') {
+                        throw new Error('Tag tidak valid atau kosong di link protokol.');
+                    }
+                    config.type = 'trojan';
+                    config.tag = tag;
+                    config.server = url.hostname;
+                    config.server_port = parseInt(url.port) || 443;
+                    config.password = url.username;
+                    
+                    const params = new URLSearchParams(url.search);
+                    config.tls = {
+                        "enabled": params.get('security') === 'tls',
+                        "server_name": params.get('sni') || params.get('host') || url.hostname,
+                        "insecure": true,
+                        "utls": {
+                            "enabled": false,
+                            "fingerprint": "chrome"
+                        }
+                    };
+                    config.transport = {
+                        "type": params.get('type') || 'ws',
+                        "path": params.get('path') || '/',
+                        "headers": {
+                            "Host": params.get('host') || params.get('sni') || url.hostname
+                        }
+                    };
+                    config.multiplex = {
+                        "enabled": false,
+                        "protocol": 'smux',
+                        "max_streams": 32
+                    };
+                    config.domain_strategy = 'ipv4_only';
+                } else {
+                    throw new Error('Protokol tidak didukung. Saat ini hanya mendukung Trojan.');
+                }
+
+                return config;
+            } catch (e) {
+                throw new Error(`Link protokol tidak valid: ${e.message}`);
+            }
+        }
+
+        function convertProtocol() {
+            const links = document.getElementById('protocolLinks').value.trim().split('\n').filter(link => link.trim() !== '');
+            const errorMsg = document.getElementById('errorMsg');
+            const output = document.getElementById('output');
+
+            if (!links.length) {
+                showToast('Error', 'Tidak ada tautan yang dimasukkan.', 'danger');
+                return;
+            }
+
+            try {
+                const newConfig = JSON.parse(JSON.stringify(singboxTemplate));
+                const tags = new Set();
+                const newOutbounds = [];
+
+                for (const link of links) {
+                    const parsedConfig = parseProtocolLink(link);
+                    if (tags.has(parsedConfig.tag)) {
+                        throw new Error(`Tag duplikat ditemukan: ${parsedConfig.tag}`);
+                    }
+                    tags.add(parsedConfig.tag);
+                    newOutbounds.push(parsedConfig);
+                }
+
+                const loadBalanceOutbound = {
+                    "type": "urltest",
+                    "tag": "loadbalance",
+                    "outbounds": Array.from(tags),
+                    "url": "https://www.google.com/generate_204",
+                    "interval": "10s",
+                    "tolerance": 50
+                };
+                const bestPingOutbound = {
+                    "type": "urltest",
+                    "tag": "bestping",
+                    "outbounds": Array.from(tags),
+                    "url": "https://www.google.com/generate_204",
+                    "interval": "10s",
+                    "tolerance": 50
+                };
+                newOutbounds.push(loadBalanceOutbound, bestPingOutbound);
+
+                const internetOutbound = newConfig.outbounds.find(out => out.tag === "Internet");
+                const sosialMediaOutbound = newConfig.outbounds.find(out => out.tag === "SosialMedia");
+                const gameOutbound = newConfig.outbounds.find(out => out.tag === "Game");
+                const streamingOutbound = newConfig.outbounds.find(out => out.tag === "Streaming");
+                const speedTestOutbound = newConfig.outbounds.find(out => out.tag === "SpeedTest");
+                if (internetOutbound) {
+                    internetOutbound.outbounds = ["loadbalance", "bestping", ...Array.from(tags)];
+                }
+                if (sosialMediaOutbound) {
+                    sosialMediaOutbound.outbounds = ["loadbalance", "bestping", ...Array.from(tags)];
+                }
+                if (gameOutbound) {
+                    gameOutbound.outbounds = ["loadbalance", "bestping", ...Array.from(tags)];
+                }
+                if (streamingOutbound) {
+                    streamingOutbound.outbounds = ["loadbalance", "bestping", ...Array.from(tags)];
+                }
+                if (speedTestOutbound) {
+                    speedTestOutbound.outbounds = ["Internet", "loadbalance", "bestping", ...Array.from(tags)];
+                }
+
+                const insertIndex = newConfig.outbounds.findIndex(out => out.tag === "speedtest");
+                newConfig.outbounds.splice(insertIndex, 0, ...newOutbounds);
+
+                output.textContent = JSON.stringify(newConfig, null, 2);
+                Prism.highlightElement(output);
+                errorMsg.style.display = 'none';
+                showToast('Sukses', 'Konversi selesai! Outbound speedtest telah ditambahkan.', 'success');
+            } catch (e) {
+                errorMsg.textContent = e.message;
+                errorMsg.style.display = 'block';
+                output.textContent = 'Masukkan tautan dan klik Convert untuk melihat hasil.';
+                showToast('Error', e.message, 'danger');
+            }
+        }
+
+        function downloadJson() {
+            const output = document.getElementById('output').textContent;
+            if (!output || output.includes('Masukkan tautan')) {
+                showToast('Error', 'Tidak ada konfigurasi untuk diunduh!', 'danger');
+                return;
+            }
+            const blob = new Blob([output], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sing-box-config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Sukses', 'File JSON berhasil diunduh!', 'success');
+        }
+
+        function copyJson() {
+            const output = document.getElementById('output').textContent;
+            if (!output || output.includes('Masukkan tautan')) {
+                showToast('Error', 'Tidak ada konfigurasi untuk disalin!', 'danger');
+                return;
+            }
+            navigator.clipboard.writeText(output).then(() => {
+                showToast('Sukses', 'JSON berhasil disalin ke clipboard!', 'success');
+            });
+        }
+
+        function showToast(title, message, type) {
+            const toastEl = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastBody = document.getElementById('toastBody');
+            toastTitle.textContent = title;
+            toastBody.textContent = message;
+            toastEl.classList.remove('bg-success', 'bg-danger');
+            toastEl.classList.add(`bg-${type}`);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    </script>
+</body>
+</html>
